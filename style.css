@@ -2,6 +2,8 @@
   box-shadow: 5px 10px 10px rgb(0 0 0 / 10%);
   border-collapse: collapse;
   font-family: Georgia, "Times New Roman", Times, serif;
+  margin: auto;
+  text-align: center;
 }
 
 .table thead th {
