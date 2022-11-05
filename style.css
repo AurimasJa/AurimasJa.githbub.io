@@ -1,0 +1,32 @@
+.table {
+  box-shadow: 5px 10px 10px rgb(0 0 0 / 10%);
+  border-collapse: collapse;
+  font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+.table thead th {
+  background: #009578;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.table td,
+.table th {
+  padding: 10px 20px;
+}
+
+.table tbody tr:nth-of-type(even) {
+  background: #eeeeee;
+}
+
+th {
+  cursor: pointer;
+}
+
+.table tr:hover {
+  background-color: #90ee90;
+}
+
+.table tbody tr:nth-of-type(even):hover {
+  background-color: #90ee90;
+}
