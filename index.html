@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+  </head>
+  <body>
+    <table class="table">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      const api_url = "https://tomsen.dev/FlowFormaAPI/names";
+      const api_url_tech = "https://tomsen.dev/FlowFormaAPI/tech";
+      // https://tomsen.dev/FlowFormaAPI/getdate/:name
+      // https://tomsen.dev/FlowFormaAPI/getdate/Steve Jobs
+      const api_url_date = "https://tomsen.dev/FlowFormaAPI/getdate/";
+
+      async function loadIntoTable(url, table) {
+        let result = [];
+        const headers = ["Name", "Tech", "Age"];
+        const tableHead = table.querySelector("thead");
+        const tableBody = table.querySelector("tbody");
+
+        const response = await fetch(api_url);
+        const names = await response.json();
+        const response1 = await fetch(api_url_tech);
+        const techs = await response1.json();
+
+        tableHead.innerHTML = "<tr></tr>";
+        tableBody.innerHTML = "";
+        //header
+        for (const headerText of headers) {
+          const headerElement = document.createElement("th");
+          headerElement.setAttribute("id", headerText);
+          headerElement.textContent = headerText;
+          tableHead.querySelector("tr").appendChild(headerElement);
+        }
+        //names column
+        for (var a = 0; a < names.length; a++) {
+          const rowElement = document.createElement("tr");
+          const cellElement = document.createElement("td");
+          cellElement.textContent = names[a];
+          rowElement.appendChild(cellElement);
+          tableBody.appendChild(rowElement);
+        }
+        //techs column
+        var rowIndex = -1;
+        $(document).ready(function () {
+          $("table")
+            .find("tr")
+            .each(function () {
+              $(this)
+                .find("td")
+                .eq(0)
+                .after("<td>" + techs[rowIndex] + "</td>");
+              $("table");
+              rowIndex++;
+            });
+        });
+        //ages column
+        Promise.all(
+          names.map((x) =>
+            fetch(api_url_date + x).then((response) => response.json())
+          )
+        ).then((personDate) => {
+          for (var i in personDate) {
+            var ageInMs = 0;
+            var dateObjectValues = Object.values(personDate[i]);
+            if (dateObjectValues[1] == null) {
+              ageInMs = Math.abs(new Date() - new Date(dateObjectValues[0]));
+            } else {
+              ageInMs = Math.abs(
+                new Date(dateObjectValues[1]) - new Date(dateObjectValues[0])
+              );
+            }
+            result.push(convertMsToYears(ageInMs));
+          }
+          var int = -1;
+          $(document).ready(function () {
+            $("table")
+              .find("tr")
+              .each(function () {
+                $(this)
+                  .find("td")
+                  .eq(1)
+                  .after("<td>" + result[int] + "</td>")
+                  .trigger("update");
+                int++;
+              });
+          });
+        });
+      }
+
+      function convertMsToYears(mSeconds) {
+        var checkYear = Math.floor(mSeconds / 31536000000);
+        return checkYear;
+      }
+
+      function sortTable(column, type) {
+        //in which way we are ordering data (at the beggining it is null)
+        var order = $(".table thead tr>th:eq(" + column + ")").data("order");
+        order = order === "ASC" ? "DESC" : "ASC";
+        $(".table thead tr>th:eq(" + column + ")").data("order", order);
+
+        // sorting table
+        $(".table tbody tr")
+          .sort(function (a, b) {
+            a = $(a)
+              .find("td:eq(" + column + ")")
+              .text();
+            b = $(b)
+              .find("td:eq(" + column + ")")
+              .text();
+
+            switch (type) {
+              case "text":
+                return order === "ASC"
+                  ? a.localeCompare(b)
+                  : b.localeCompare(a);
+                break;
+              case "number":
+                return order === "ASC" ? a - b : b - a;
+                break;
+            }
+          })
+          .appendTo(".table tbody");
+      }
+
+      loadIntoTable(api_url, document.querySelector("table"));
+
+      $(document).on("click", "#Name", function () {
+        sortTable(0, "text");
+      });
+      $(document).on("click", "#Tech", function () {
+        sortTable(1, "text");
+      });
+      $(document).on("click", "#Age", function () {
+        sortTable(2, "number");
+      });
+    </script>
+  </body>
+</html>
